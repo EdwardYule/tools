@@ -11,7 +11,6 @@ Vue.directive = newDirectives;
 // 这种方法固然可以修改全局的监听事件，但影响太大，灵活性太小，作用有限
 const on = Vue.prototype.$on;
 const newOn = function (...args) {
-  console.log(args);
   on.call(this, ...args);
 }
 Vue.prototype.$on = newOn;
