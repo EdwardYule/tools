@@ -1,6 +1,6 @@
 <template>
   <div class="button">
-    <el-button v-bind="$attrs">
+    <el-button v-bind="$attrs" v-on="$listeners">
       <slot></slot>
     </el-button>
   </div>
