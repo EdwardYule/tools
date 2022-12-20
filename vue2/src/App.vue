@@ -1,29 +1,17 @@
 <template>
   <div id="app">
-    <Template @ddd="test"></Template>
-    <Button type="warning" @click="test"> ddd </Button>
-    <input v-focus />
+    <Button type="warning" @click="doSomething"> throttle </Button>
+    <Button type="warning" @click="doSomething2"> debounce </Button>
   </div>
 </template>
 
 <script>
-import Template from "@/components/Template.vue";
 import Button from "@/components/Button.vue";
-const counter = function (fn) {
-  // 这个写法很好，可以用这个写法来作为防抖节流，这样就不论是什么事件，都可以兼容
-  // 唯一的问题是，这个函数需要导出引入，因此可以考虑挂载在某个全局的位置，无需重复引入
-  let n = 0;
-  return function (...args) {
-    console.log(n);
-    n = n + 1;
-    fn.call(this, ...args);
-  };
-};
+import { throttle, debounce } from "@/plugins/decorator.js";
 
 export default {
   name: "app",
   components: {
-    Template,
     Button,
   },
   data() {
@@ -32,7 +20,15 @@ export default {
     }
   },
   methods: {
-    test: counter(function(...args){
+    // 这里用装饰器模式来修饰函数
+    // 这个写法很好，用这个写法来作为防抖节流，这样就不论是什么事件，都可以兼容
+    // 唯一的问题是，这个函数需要导出引入，因此可以考虑挂载在某个全局的位置，无需重复引入
+    doSomething: throttle(function(...args){
+      console.log(this.mm);
+      console.log(args);
+    }),
+    doSomething2: debounce(function(...args){
+      console.log(this.mm);
       console.log(args);
     }),
   },
