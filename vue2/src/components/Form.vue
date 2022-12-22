@@ -1,63 +1,68 @@
 <template>
   <div class="form">
-    <el-form v-bind="$attrs" v-on="$listeners">
+    <el-form
+      label-width="80px"
+      v-bind="$attrs"
+      v-on="$listeners"
+      ref="form"
+      :model="formData"
+    >
       <el-form-item
         v-bind="item.formItemOptions"
         v-for="(item, i) of formList"
         :key="i"
       >
-        <template v-if="item.inputOptions.type == 'Radio'">
+        <template v-if="item.type == 'Radio'">
           <Radio></Radio>
         </template>
-        <template v-if="item.inputOptions.type == 'Checkbox'">
+        <template v-if="item.type == 'Checkbox'">
           <Checkbox></Checkbox>
         </template>
-        <template v-if="item.inputOptions.type == 'InputNumber'">
+        <template v-if="item.type == 'InputNumber'">
           <InputNumber></InputNumber>
         </template>
-        <template v-if="item.inputOptions.type == 'Select'">
+        <template v-if="item.type == 'Select'">
           <Select></Select>
         </template>
-        <template v-if="item.inputOptions.type == 'Cascader'">
+        <template v-if="item.type == 'Cascader'">
           <Cascader></Cascader>
         </template>
-        <template v-if="item.inputOptions.type == 'Switch'">
-          <Switch></Switch>
+        <template v-if="item.type == 'Switch'">
+          <VSwitch></VSwitch>
         </template>
-        <template v-if="item.inputOptions.type == 'Slider'">
+        <template v-if="item.type == 'Slider'">
           <Slider></Slider>
         </template>
-        <template v-if="item.inputOptions.type == 'TimePicker'">
+        <template v-if="item.type == 'TimePicker'">
           <TimePicker></TimePicker>
         </template>
-        <template v-if="item.inputOptions.type == 'DatePicker'">
+        <template v-if="item.type == 'DatePicker'">
           <DatePicker></DatePicker>
         </template>
-        <template v-if="item.inputOptions.type == 'DateTimePicker'">
+        <template v-if="item.type == 'DateTimePicker'">
           <DateTimePicker></DateTimePicker>
         </template>
-        <template v-if="item.inputOptions.type == 'Upload'">
+        <template v-if="item.type == 'Upload'">
           <Upload></Upload>
         </template>
-        <template v-if="item.inputOptions.type == 'Rate'">
+        <template v-if="item.type == 'Rate'">
           <Rate></Rate>
         </template>
-        <template v-if="item.inputOptions.type == 'ColorPicker'">
+        <template v-if="item.type == 'ColorPicker'">
           <ColorPicker></ColorPicker>
         </template>
-        <template v-if="item.inputOptions.type == 'Transfer'">
+        <template v-if="item.type == 'Transfer'">
           <Transfer></Transfer>
         </template>
         <template v-else>
-          <Input
-            v-model="item.value"
-            v-bind="item.inputOptions"
-            v-on="item.inputHandlers"
-          ></Input>
+          <Input v-model="formList[i].value" v-bind="formList[i].inputOptions"></Input>
         </template>
       </el-form-item>
-      <Button @click="submit"></Button>
     </el-form>
+    <div class="footer">
+      <Button @click="cancel" style="margin-right: 8px">取消</Button>
+      <Button @click="submit" type="primary">确认</Button>
+    </div>
   </div>
 </template>
 
@@ -87,7 +92,7 @@ export default {
     InputNumber,
     Select,
     Cascader,
-    Switch,
+    VSwitch: Switch,
     Slider,
     TimePicker,
     DatePicker,
@@ -101,28 +106,50 @@ export default {
   props: {},
   data() {
     return {
-      formData: {},
       formList: [
         {
           formItemOptions: {
             label: "活动名称",
+            rules: [
+              { required: true, message: "请输入邮箱地址", trigger: "blur" },
+            ],
           },
           inputOptions: {},
+          inputHandlers: {},
           value: "ddd",
+          key: "ddd",
           type: "Input",
         },
       ],
     };
   },
+  computed: {
+    formData() {
+      return this.formList
+        .map(({ key, value }) => ({
+          [key]: value,
+        }))
+        .reduce((res, e) => {
+          return Object.assign(res, e);
+        }, {});
+    },
+  },
   methods: {
     submit() {
-      console.log("a");
+      this.$refs.form.validate((res) => {
+        console.log(res);
+      });
     },
+    cancel() {},
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .form {
+  .footer {
+    display: flex;
+    justify-content: center;
+  }
 }
 </style>
