@@ -9,17 +9,19 @@
 
 <script>
 import { throttle, debounce } from "@/plugins/decorator.js";
+import Mixin from "./Mixin.vue";
 export default {
   name: "Button",
+  mixins: [Mixin],
   props: {
     decorator: String, // throttle, debounce
   },
   methods: {
     onClick(...args) {
-      if(this.decorator == 'throttle'){
+      if (this.decorator == "throttle") {
         return this.onThrottleClick(...args);
       }
-      if(this.decorator == 'debounce'){
+      if (this.decorator == "debounce") {
         return this.onDebounceClick(...args);
       }
       this.$emit("click", ...args);

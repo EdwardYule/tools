@@ -6,63 +6,102 @@
       v-on="$listeners"
       ref="form"
       :model="formData"
+      :inline="inline"
     >
       <el-form-item
         v-bind="item.formItemOptions"
-        v-for="(item, i) of formList"
+        v-for="(item, i) of data"
         :key="i"
+        :prop="item.key"
+        :style="{
+          float: inline ? 'left' : '',
+        }"
       >
+        <template #label>
+          {{ item.formItemOptions.label }}
+          <el-tooltip v-if="item.tooltip" :content="item.tooltip">
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+        </template>
         <template v-if="item.type == 'Radio'">
           <Radio></Radio>
         </template>
-        <template v-if="item.type == 'Checkbox'">
+        <template v-else-if="item.type == 'Checkbox'">
           <Checkbox></Checkbox>
         </template>
-        <template v-if="item.type == 'InputNumber'">
-          <InputNumber></InputNumber>
+        <template v-else-if="item.type == 'InputNumber'">
+          <InputNumber
+            v-model="item.value"
+            v-bind="item.inputOptions"
+            :placeholder="`请输入${item.formItemOptions.label}`"
+          ></InputNumber>
         </template>
-        <template v-if="item.type == 'Select'">
+        <template v-else-if="item.type == 'Select'">
           <Select></Select>
         </template>
-        <template v-if="item.type == 'Cascader'">
+        <template v-else-if="item.type == 'Cascader'">
           <Cascader></Cascader>
         </template>
-        <template v-if="item.type == 'Switch'">
+        <template v-else-if="item.type == 'Switch'">
           <VSwitch></VSwitch>
         </template>
-        <template v-if="item.type == 'Slider'">
+        <template v-else-if="item.type == 'Slider'">
           <Slider></Slider>
         </template>
-        <template v-if="item.type == 'TimePicker'">
+        <template v-else-if="item.type == 'TimePicker'">
           <TimePicker></TimePicker>
         </template>
-        <template v-if="item.type == 'DatePicker'">
+        <template v-else-if="item.type == 'DatePicker'">
           <DatePicker></DatePicker>
         </template>
-        <template v-if="item.type == 'DateTimePicker'">
+        <template v-else-if="item.type == 'DateTimePicker'">
           <DateTimePicker></DateTimePicker>
         </template>
-        <template v-if="item.type == 'Upload'">
+        <template v-else-if="item.type == 'Upload'">
           <Upload></Upload>
         </template>
-        <template v-if="item.type == 'Rate'">
+        <template v-else-if="item.type == 'Rate'">
           <Rate></Rate>
         </template>
-        <template v-if="item.type == 'ColorPicker'">
+        <template v-else-if="item.type == 'ColorPicker'">
           <ColorPicker></ColorPicker>
         </template>
-        <template v-if="item.type == 'Transfer'">
+        <template v-else-if="item.type == 'Transfer'">
           <Transfer></Transfer>
         </template>
         <template v-else>
-          <Input v-model="formList[i].value" v-bind="formList[i].inputOptions"></Input>
+          <Input
+            v-model="item.value"
+            v-bind="item.inputOptions"
+            :placeholder="`请输入${item.formItemOptions.label}`"
+          ></Input>
         </template>
       </el-form-item>
+      <div
+        class="operations"
+        :style="{
+          display: inline ? 'inline-flex' : '',
+          justifyContent: inline ? '' : 'center',
+          float: inline ? 'left' : '',
+        }"
+      >
+        <Button
+          v-for="(button, key) of operations"
+          :key="key"
+          :type="key == 'confirm' ? 'primary' : ''"
+          :decorator="key == 'confirm' ? 'debounce' : ''"
+          @click="onClick(key)"
+          class="operation"
+        >
+          {{
+            typeof button == "string"
+              ? button
+              : { confirm: "确认", cancel: "取消", reset: "重置" }[key]
+          }}
+        </Button>
+        <slot name="operations"></slot>
+      </div>
     </el-form>
-    <div class="footer">
-      <Button @click="cancel" style="margin-right: 8px">取消</Button>
-      <Button @click="submit" type="primary">确认</Button>
-    </div>
   </div>
 </template>
 
@@ -103,29 +142,22 @@ export default {
     Transfer,
     Input,
   },
-  props: {},
-  data() {
+  props: {
+    data: Array,
+    operations: Object,
+    inline: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  provide() {
     return {
-      formList: [
-        {
-          formItemOptions: {
-            label: "活动名称",
-            rules: [
-              { required: true, message: "请输入邮箱地址", trigger: "blur" },
-            ],
-          },
-          inputOptions: {},
-          inputHandlers: {},
-          value: "ddd",
-          key: "ddd",
-          type: "Input",
-        },
-      ],
+      inline: this.inline,
     };
   },
   computed: {
     formData() {
-      return this.formList
+      return this.data
         .map(({ key, value }) => ({
           [key]: value,
         }))
@@ -135,21 +167,41 @@ export default {
     },
   },
   methods: {
-    submit() {
+    onClick(key) {
+      if (key == "confirm") this.confirm();
+      if (key == "cancel") this.cancel();
+      if (key == "reset") this.reset();
+    },
+    confirm() {
       this.$refs.form.validate((res) => {
-        console.log(res);
+        if (res) {
+          this.$emit("confirm", this.formData);
+        }
       });
     },
-    cancel() {},
+    cancel() {
+      this.$emit("cancel");
+    },
+    reset() {
+      this.data.forEach((e) => {
+        e.value = new e.value.constructor().valueOf();
+        this.$refs.form.resetFields();
+      });
+      this.$emit("reset");
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .form {
-  .footer {
+  .operations {
     display: flex;
-    justify-content: center;
+    flex-wrap: wrap;
+    .operation {
+      margin-bottom: 22px;
+      margin-left: 16px;
+    }
   }
 }
 </style>
