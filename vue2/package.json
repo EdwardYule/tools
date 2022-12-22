@@ -1,8 +1,8 @@
 {
-  "name": "vue2",
+  "name": "tools",
   "version": "0.1.0",
   "private": true,
-  "main": "dist/tools.umd.min.js",
+  "main": "lib/tools.umd.min.js",
   "scripts": {
     "start": "npm run serve",
     "serve": "vue-cli-service serve --open",
