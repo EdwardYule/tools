@@ -2,10 +2,12 @@
   "name": "vue2",
   "version": "0.1.0",
   "private": true,
+  "main": "dist/tools.umd.min.js",
   "scripts": {
     "start": "npm run serve",
     "serve": "vue-cli-service serve --open",
     "build": "vue-cli-service build",
+    "build:lib": "vue-cli-service build --target lib --name tools --dest lib install/index.js",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
