@@ -1,7 +1,7 @@
 <template>
   <div class="form">
     <el-form
-      label-width="80px"
+      :label-width="$attrs['label-width'] || '80px'"
       v-bind="$attrs"
       v-on="$listeners"
       ref="form"
@@ -37,13 +37,22 @@
           ></InputNumber>
         </template>
         <template v-else-if="item.type == 'Select'">
-          <Select></Select>
+          <Select
+            v-model="item.value"
+            v-bind="item.inputOptions"
+            :placeholder="`请选择${item.formItemOptions.label}`"
+          ></Select>
         </template>
         <template v-else-if="item.type == 'Cascader'">
           <Cascader></Cascader>
         </template>
         <template v-else-if="item.type == 'Switch'">
-          <VSwitch></VSwitch>
+          <VSwitch
+            v-on="item.inputHandlers"
+            v-bind="item.inputOptions"
+            :value="item.value"
+            @change="(val) => onSwitchChange(val, item)"
+          ></VSwitch>
         </template>
         <template v-else-if="item.type == 'Slider'">
           <Slider></Slider>
@@ -188,6 +197,19 @@ export default {
         this.$refs.form.resetFields();
       });
       this.$emit("reset");
+    },
+    async onSwitchChange(val, item) {
+      try {
+        if (item.inputOptions.validator) {
+          if (await item.inputOptions.validator(val)) {
+            item.value = val;
+          }
+        } else {
+          item.value = val;
+        }
+      } catch (error) {
+        error;
+      }
     },
   },
 };
